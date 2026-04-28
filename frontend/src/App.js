@@ -6,6 +6,11 @@ function App() {
   const [keywords, setKeywords] = useState([]);
 
   const analyzeJD = async () => {
+<<<<<<< HEAD
+=======
+    console.log("Button clicked");
+  try{
+>>>>>>> df8fb63 (Setup frontend + backend with proper gitignore)
     const res = await fetch("http://localhost:5000/analyze-jd", {
       method: "POST",
       headers: {
@@ -16,6 +21,12 @@ function App() {
 
     const data = await res.json();
     setKeywords(data.keywords);
+<<<<<<< HEAD
+=======
+  }catch(err){
+    console.error("Error:",err);
+  }
+>>>>>>> df8fb63 (Setup frontend + backend with proper gitignore)
   };
 
   return (
