@@ -43,3 +43,13 @@ app.post("/test-ai", (req, res) => {
 app.listen(5001, () => {
   console.log("Server running on port 5000");
 });
+app.use(express.json());
+
+app.post("/analyze-jd", (req, res) => {
+  const { jd } = req.body;
+
+  // temporary dummy response
+  res.json({
+    keywords: ["React", "Node", "MongoDB"],
+  });
+});
