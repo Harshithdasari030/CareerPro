@@ -3,55 +3,91 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-<<<<<<< HEAD
-const analyzeJD = require("./ai/jdAnalyzer");
+// 🔥 Orchestrator (AI layer)
+const { extractKeywords, rewriteResume } = require("./ai/orchestrator");
 
 const app = express();
 
-// ✅ MIDDLEWARE (always top)
-=======
-const app = express();
-
->>>>>>> df8fb63 (Setup frontend + backend with proper gitignore)
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
 console.log("API KEY:", process.env.GEMINI_API_KEY);
 
-<<<<<<< HEAD
-// ✅ TEST ROUTE
-=======
 // ✅ Root route
->>>>>>> df8fb63 (Setup frontend + backend with proper gitignore)
 app.get("/", (req, res) => {
   res.send("Backend is running");
 });
 
-<<<<<<< HEAD
-// ✅ JD ANALYSIS (dummy for now)
-app.post("/analyze-jd", (req, res) => {
-  const { jd } = req.body;
+// 🚀 AI JD Analyzer (Improved ATS Logic)
+app.post("/analyze-jd", async (req, res) => {
+  try {
+    const { jd, resume } = req.body;
 
-  res.json({
-    keywords: ["React", "Node", "MongoDB"],
-  });
+    console.log("API HIT");
+
+    const keywords = await extractKeywords(jd);
+
+    const normalize = (text) => (text || "").toLowerCase();
+
+    const resumeText = normalize(resume);
+
+    // 🧠 Improved matching (handles "react" vs "react.js")
+    const isMatch = (keyword) => {
+      const k = keyword.toLowerCase().replace(/\.js/g, "").trim();
+      return resumeText.includes(k);
+    };
+
+    // ✅ Matched Keywords
+    const matchedKeywords = keywords.filter(isMatch);
+
+    // ❌ Missing Keywords
+    const missingKeywords = keywords.filter(
+      (k) => !isMatch(k)
+    );
+
+    // 🎯 ATS Score (more realistic)
+    let score = 0;
+
+    if (keywords.length > 0) {
+      score = Math.round(
+        (matchedKeywords.length / keywords.length) * 100
+      );
+    }
+
+    // 🔥 Prevent fake 100% if too few keywords
+    if (keywords.length < 5 && score === 100) {
+      score = 80;
+    }
+
+    res.json({
+      keywords,
+      matched: matchedKeywords,
+      missing: missingKeywords,
+      score,
+    });
+
+  } catch (err) {
+    console.error("❌ ANALYZE ERROR:", err);
+    res.status(500).send("AI Error");
+  }
 });
 
-// ✅ TEST AI ROUTE
-=======
-// ✅ JD Analyzer (important)
-app.post("/analyze-jd", (req, res) => {
-  console.log("API HIT"); // 👈 debug
+// ✨ Resume Rewrite
+app.post("/rewrite", async (req, res) => {
+  try {
+    const { resume, keywords } = req.body;
 
-  const { jd } = req.body;
+    const output = await rewriteResume(resume, keywords);
 
-  res.json({
-    keywords: ["React", "Node", "MongoDB"],
-  });
+    res.json({ output });
+  } catch (err) {
+    console.error("❌ REWRITE ERROR:", err);
+    res.status(500).send("Rewrite Error");
+  }
 });
 
-// ✅ Optional test route
->>>>>>> df8fb63 (Setup frontend + backend with proper gitignore)
+// ✅ Test route
 app.post("/test-ai", (req, res) => {
   const dummyResponse = {
     skills: ["React", "Node.js"],
@@ -62,14 +98,7 @@ app.post("/test-ai", (req, res) => {
   res.json(dummyResponse);
 });
 
-<<<<<<< HEAD
-// ✅ SERVER START (always LAST)
+// ✅ Server start
 app.listen(5000, () => {
   console.log("Server running on http://localhost:5000");
 });
-=======
-// ✅ RUN SERVER (correct port)
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
-});
->>>>>>> df8fb63 (Setup frontend + backend with proper gitignore)
