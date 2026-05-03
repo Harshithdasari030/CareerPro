@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
   const [resume, setResume] = useState("");
@@ -7,6 +7,27 @@ function App() {
   const [missing, setMissing] = useState([]);
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Fade in on load
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
+  // Animate score
+  useEffect(() => {
+    if (score > 0) {
+      const timer = setTimeout(() => {
+        if (animatedScore < score) {
+          setAnimatedScore(prev => Math.min(prev + 1, score));
+        }
+      }, 20);
+      return () => clearTimeout(timer);
+    } else {
+      setAnimatedScore(0);
+    }
+  }, [score, animatedScore]);
 
   // 🔍 Analyze JD
   const analyzeJD = async () => {
@@ -55,68 +76,81 @@ function App() {
   };
 
   return (
-    <div style={{ display: "flex", padding: "20px", gap: "20px" }}>
+    <div style={{ display: "flex", padding: "20px", gap: "20px" }} className={isLoaded ? "fade-in" : ""}>
       
       {/* LEFT SIDE */}
-      <div style={{ width: "50%" }}>
-        <h2>Resume Input</h2>
+      <div style={{ width: "50%" }} className="card">
+        <h2 className="section-heading resume-input">Resume Input</h2>
         <textarea
           rows="10"
           style={{ width: "100%" }}
           placeholder="Paste your resume..."
           onChange={(e) => setResume(e.target.value)}
+          className="animated-textarea"
         />
 
-        <h2>Job Description</h2>
+        <h2 className="section-heading job-desc">Job Description</h2>
         <textarea
           rows="10"
           style={{ width: "100%" }}
           placeholder="Paste JD..."
           onChange={(e) => setJd(e.target.value)}
+          className="animated-textarea"
         />
 
-        <button onClick={analyzeJD} disabled={loading}>
+        <button onClick={analyzeJD} disabled={loading} className="animated-button">
           {loading ? "Analyzing..." : "Analyze JD"}
         </button>
       </div>
 
       {/* RIGHT SIDE */}
-      <div style={{ width: "50%" }}>
-        <h2>Keywords</h2>
+      <div style={{ width: "50%" }} className="card">
+        <h2 className="section-heading keywords">Keywords</h2>
         {keywords.length === 0 ? (
           <p>No keywords yet</p>
         ) : (
-          <ul>
+          <ul className="animated-list">
             {keywords.map((k, i) => (
               <li key={i}>{k}</li>
             ))}
           </ul>
         )}
 
-        <h2>Missing Keywords</h2>
+        <h2 className="section-heading missing">Missing Keywords</h2>
         {missing.length === 0 ? (
           <p>None 🎉</p>
         ) : (
-          <ul style={{ color: "red" }}>
+          <ul style={{ color: "red" }} className="animated-list">
             {missing.map((k, i) => (
               <li key={i}>{k}</li>
             ))}
           </ul>
         )}
 
-        <h2>ATS Score</h2>
-        <p style={{ fontSize: "24px", fontWeight: "bold" }}>
-          {score}%
-        </p>
+        <h2 className="section-heading ats-score">ATS Score</h2>
+        <div className="progress-ring">
+          <svg className="progress-ring-circle" width="120" height="120">
+            <circle className="progress-ring-bg" cx="60" cy="60" r="45"></circle>
+            <circle
+              className="progress-ring-fill"
+              cx="60"
+              cy="60"
+              r="45"
+              style={{ strokeDashoffset: 283 - (283 * animatedScore / 100) }}
+            ></circle>
+          </svg>
+          <div className="ats-score">{animatedScore}</div>
+        </div>
 
-        <h2>Resume Preview</h2>
+        <h2 className="section-heading preview">Resume Preview</h2>
         <div
           style={{
-            border: "1px solid black",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
             padding: "10px",
             minHeight: "150px",
-            background: "#f9f9f9",
+            background: "rgba(255, 255, 255, 0.03)",
           }}
+          className="resume-preview"
           dangerouslySetInnerHTML={{
             __html: highlightMissing(resume),
           }}
