@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+const analyzeJD = require("./ai/jdAnalyzer");
 const express = require("express");
 const cors = require("cors");
 
@@ -29,9 +29,12 @@ app.post("/analyze-jd", async (req, res) => {
     let keywords = [];
 
     try {
-      keywords = await extractKeywords(jd);
+      // keywords = await extractKeywords(jd);
+      keywords = await analyzeJD(jd);
     } catch (err) {
-      console.log("⚠️ AI failed, using fallback");
+      // console.log("⚠️ AI failed, using fallback");
+      console.log("❌ AI ERROR:", err.message);
+      console.log(err);
 
       keywords = [
         "react",

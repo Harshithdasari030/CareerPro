@@ -59,6 +59,7 @@ Rajiv Gandhi Technical University, Bhopal
 * Team player
 * Problem-solving mindset
 
+------------------------------------------------------------------
 
 **Company:** TechNova Solutions Pvt Ltd
 
@@ -102,7 +103,7 @@ I have worked on small projects in college.
 I am eager to learn new technologies.
 I have efficient knowledge of javascript.
 
-
+--------------------------------------------------------------------------------------------
 
 We are looking for a React Developer with strong experience in modern JavaScript, React.js, and frontend development. 
 

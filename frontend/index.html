@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CareerForge - JD Analyzer</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f7fa;
+      text-align: center;
+      padding: 40px;
+    }
+
+    textarea {
+      width: 60%;
+      height: 150px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      width: 60%;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+  </style>
+</head>
+<script>
+async function analyzeJD() {
+  const jd = document.getElementById("jd").value;
+
+  const res = await fetch("http://localhost:5000/test-ai", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ jd })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("skills").innerText = data.skills.join(", ");
+  document.getElementById("keywords").innerText = data.keywords.join(", ");
+  document.getElementById("summary").innerText = data.summary;
+}
+</script>
+<body>
+
+  <h1>🚀 CareerForge JD Analyzer</h1>
+
+  <textarea id="jd" placeholder="Paste Job Description here..."></textarea>
+  <br>
+  <button onclick="analyzeJD()">Analyze</button>
+
+  <div class="card">
+    <h3>Skills:</h3>
+    <p id="skills"></p>
+
+    <h3>Keywords:</h3>
+    <p id="keywords"></p>
+
+    <h3>Summary:</h3>
+    <p id="summary"></p>
+  </div>
+
+  <script>
+    async function analyzeJD() {
+      const res = await fetch("http://localhost:5001/test-ai");
+      const data = await res.json();
+
+      document.getElementById("skills").innerText = data.skills.join(", ");
+      document.getElementById("keywords").innerText = data.keywords.join(", ");
+      document.getElementById("summary").innerText = data.summary;
+    }
+  </script>
+
+</body>
+</html>

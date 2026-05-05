@@ -17,8 +17,18 @@ Job Description:
 ${jobDescription}
 `
   });
+  // ✅ safely extract AI response
+let text =
+  response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-  const text = response.text;
+// 🔥 clean unwanted text (important fix)
+text = text
+  .replace(/```json|```/g, "")
+  .replace(/^[^\[]*/, "")
+  .replace(/[^\]]*$/, "")
+  .trim();
+
+console.log("AI RESPONSE:", text);
 
   try {
     return JSON.parse(text);
