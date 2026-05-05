@@ -6,12 +6,13 @@ function App() {
   const [keywords, setKeywords] = useState([]);
   const [missing, setMissing] = useState([]);
   const [score, setScore] = useState(0);
+  const [suggestions, setSuggestions] = useState([]);
+  const [improvedResume, setImprovedResume] = useState("");
   const [loading, setLoading] = useState(false);
   const [animatedScore, setAnimatedScore] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
 
-  // Fade in on load
+  // Fade in
   useEffect(() => {
     setIsLoaded(true);
   }, []);
@@ -21,7 +22,7 @@ function App() {
     if (score > 0) {
       const timer = setTimeout(() => {
         if (animatedScore < score) {
-          setAnimatedScore(prev => Math.min(prev + 1, score));
+          setAnimatedScore((prev) => Math.min(prev + 1, score));
         }
       }, 20);
       return () => clearTimeout(timer);
@@ -62,8 +63,10 @@ function App() {
     setLoading(false);
   };
 
-  // 🔴 Highlight missing keywords in resume
+  // 🔴 Highlight missing
   const highlightMissing = (text) => {
+    if (!text) return "";
+
     let highlighted = text;
 
     missing.forEach((word) => {
@@ -77,104 +80,156 @@ function App() {
     return highlighted.replace(/\n/g, "<br/>");
   };
 
+  // 📄 Download PDF
+  const downloadPDF = async () => {
+    try {
+      const cleanHTML = resume.replace(/\n/g, "<br/>");
+
+      const res = await fetch("http://localhost:5000/download-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ html: cleanHTML }),
+      });
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "resume.pdf";
+      a.click();
+    } catch (err) {
+      console.error(err);
+      alert("PDF download failed");
+    }
+  };
+
+  // 🔥 Improve Resume
+  const improveResume = async () => {
+    if (!resume.trim()) {
+      alert("Please enter resume first");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/rewrite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ resume }),
+      });
+
+      const data = await res.json();
+      setImprovedResume(data.improved || "");
+    } catch (err) {
+      console.error(err);
+      alert("Rewrite failed");
+    }
+  };
+
   return (
     <div style={{ display: "flex", padding: "20px", gap: "20px" }} className={isLoaded ? "fade-in" : ""}>
-      
-      {/* LEFT SIDE */}
+
+      {/* LEFT */}
       <div style={{ width: "50%" }} className="card">
-        <h2 className="section-heading resume-input">Resume Input</h2>
+        <h2>Resume Input</h2>
         <textarea
           rows="10"
           style={{ width: "100%" }}
           placeholder="Paste your resume..."
-          onChange={(e) => setResume(e.target.value)}
-          className="animated-textarea"
+          onChange={(e) => {
+            setResume(e.target.value);
+            setSuggestions([]);
+            setImprovedResume("");
+          }}
         />
 
-        <h2 className="section-heading job-desc">Job Description</h2>
+        <h2>Job Description</h2>
         <textarea
           rows="10"
           style={{ width: "100%" }}
           placeholder="Paste JD..."
-          onChange={(e) => setJd(e.target.value)}
-          className="animated-textarea"
+          onChange={(e) => {
+            setJd(e.target.value);
+            setSuggestions([]);
+          }}
         />
 
-        <button onClick={analyzeJD} disabled={loading} className="animated-button">
+        <button onClick={analyzeJD} disabled={loading}>
           {loading ? "Analyzing..." : "Analyze JD"}
+        </button>
+
+        <br /><br />
+
+        <button onClick={downloadPDF}>
+          Download Resume PDF
+        </button>
+
+        <br /><br />
+
+        <button onClick={improveResume}>
+          Improve Resume 🚀
         </button>
       </div>
 
-      {/* RIGHT SIDE */}
+      {/* RIGHT */}
       <div style={{ width: "50%" }} className="card">
-        <h2 className="section-heading keywords">Keywords</h2>
+
+        <h2>Keywords</h2>
         {keywords.length === 0 ? (
           <p>No keywords yet</p>
         ) : (
-          <ul className="animated-list">
+          <ul>
             {keywords.map((k, i) => (
               <li key={i}>{k}</li>
             ))}
           </ul>
         )}
 
-        <h2 className="section-heading missing">Missing Keywords</h2>
-
-          {missing.length === 0 ? (
-            <p>None 🎉</p>
-          ) : (
-            <ul style={{ color: "red" }} className="animated-list">
-              {missing.map((k, i) => (
-                <li key={i}>{k}</li>
-              ))}
-            </ul>
-          )}
-          
-
-        {suggestions && suggestions.length > 0 ? (
-          <>
-            <h2 className="section-heading suggestions">💡 Suggestions</h2>
-            <ul className="animated-list">
-              {suggestions.map((s, i) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ul>
-          </>
+        <h2>Missing Keywords</h2>
+        {missing.length === 0 ? (
+          <p>None 🎉</p>
         ) : (
-          <>
-            <h2 className="section-heading suggestions">💡 Suggestions</h2>
-            <p>No suggestions yet</p>
-          </>
+          <ul style={{ color: "red" }}>
+            {missing.map((k, i) => (
+              <li key={i}>{k}</li>
+            ))}
+          </ul>
         )}
 
-        <h2 className="section-heading ats-score">ATS Score</h2>
-        <div className="progress-ring">
-          <svg className="progress-ring-circle" width="120" height="120">
-            <circle className="progress-ring-bg" cx="60" cy="60" r="45"></circle>
-            <circle
-              className="progress-ring-fill"
-              cx="60"
-              cy="60"
-              r="45"
-              style={{ strokeDashoffset: 283 - (283 * animatedScore / 100) }}
-            ></circle>
-          </svg>
-          <div className="ats-score">{animatedScore}</div>
-        </div>
+        <h2>💡 Suggestions</h2>
+        {suggestions.length === 0 ? (
+          <p>No suggestions yet</p>
+        ) : (
+          <ul>
+            {suggestions.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        )}
 
-        <h2 className="section-heading preview">Resume Preview</h2>
+        <h2>ATS Score</h2>
+        <h1>{animatedScore}%</h1>
+
+        <h2>Resume Preview</h2>
         <div
           style={{
-            border: "1px solid rgba(255, 255, 255, 0.2)",
+            border: "1px solid black",
             padding: "10px",
             minHeight: "150px",
-            background: "rgba(255, 255, 255, 0.03)",
           }}
-          className="resume-preview"
           dangerouslySetInnerHTML={{
             __html: highlightMissing(resume),
           }}
         />
+
+        <h2>Improved Resume</h2>
+        <pre style={{ whiteSpace: "pre-wrap" }}>
+          {improvedResume || "Click 'Improve Resume'"}
+        </pre>
       </div>
     </div>
   );

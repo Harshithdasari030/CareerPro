@@ -4,7 +4,10 @@ const express = require("express");
 const cors = require("cors");
 
 // 🔥 Orchestrator (AI layer)
-const { extractKeywords, rewriteResume } = require("./ai/orchestrator");
+const { generateSuggestions, rewriteResume } = require("./ai/orchestrator");
+
+// 📄 PDF Generator
+const generatePDF = require("./utils/pdfGenerator");
 
 const app = express();
 
@@ -19,7 +22,7 @@ app.get("/", (req, res) => {
   res.send("Backend is running");
 });
 
-// 🚀 AI JD Analyzer (Improved ATS Logic)
+// 🚀 AI JD Analyzer (MERGED VERSION)
 app.post("/analyze-jd", async (req, res) => {
   try {
     const { jd, resume } = req.body;
@@ -28,13 +31,11 @@ app.post("/analyze-jd", async (req, res) => {
 
     let keywords = [];
 
+    // 🔥 AI + fallback (from your friend)
     try {
-      // keywords = await extractKeywords(jd);
       keywords = await analyzeJD(jd);
     } catch (err) {
-      // console.log("⚠️ AI failed, using fallback");
       console.log("❌ AI ERROR:", err.message);
-      console.log(err);
 
       keywords = [
         "react",
@@ -43,11 +44,11 @@ app.post("/analyze-jd", async (req, res) => {
         "css",
         "node",
         "rest api",
-        "git"
+        "git",
       ];
     }
 
-    // ✅ CLEAN KEYWORDS
+    // ✅ CLEAN KEYWORDS (best practice)
     const cleanKeywords = [...new Set(
       keywords.map(k => k.toLowerCase().replace(".js", "").trim())
     )];
@@ -64,7 +65,7 @@ app.post("/analyze-jd", async (req, res) => {
     const matchedKeywords = cleanKeywords.filter(isMatch);
     const missingKeywords = cleanKeywords.filter(k => !isMatch(k));
 
-    // ✅ SCORE (FIXED: use cleanKeywords, not keywords)
+    // ✅ SCORE
     let score = 0;
     if (cleanKeywords.length > 0) {
       score = Math.round(
@@ -76,57 +77,86 @@ app.post("/analyze-jd", async (req, res) => {
       score = 80;
     }
 
-    // ✅ SUGGESTIONS (your feature 👇🔥)
-    const suggestions = missingKeywords.map(k =>
-      `Add or highlight experience related to ${k}`
-    );
+    // 🔥 AI Suggestions (your feature)
+    let suggestions = [];
+    try {
+      suggestions = await generateSuggestions({
+        resume,
+        keywords: cleanKeywords,
+        missing: missingKeywords,
+      });
+    } catch (err) {
+      console.log("⚠️ Suggestions fallback");
+      suggestions = missingKeywords.map(k =>
+        `Add or highlight experience related to ${k}`
+      );
+    }
 
     res.json({
       keywords: cleanKeywords,
       matched: matchedKeywords,
       missing: missingKeywords,
       score,
-      suggestions
+      suggestions,
     });
 
   } catch (err) {
     console.error("❌ FULL BACKEND ERROR:", err);
 
-    // ✅ IMPORTANT: never crash frontend
+    // never crash frontend
     res.status(200).json({
       keywords: [],
       matched: [],
       missing: [],
       score: 0,
       suggestions: [],
-      error: true
+      error: true,
     });
+  }
+});
+
+// 📄 PDF DOWNLOAD
+app.post("/download-pdf", async (req, res) => {
+  try {
+    const { html } = req.body;
+
+    console.log("📥 RECEIVED HTML:", html);
+
+    const pdf = await generatePDF(html);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment; filename=resume.pdf",
+    });
+
+    res.send(pdf);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("PDF Error");
   }
 });
 
 // ✨ Resume Rewrite
 app.post("/rewrite", async (req, res) => {
   try {
-    const { resume, keywords } = req.body;
+    const { resume } = req.body;
 
-    const output = await rewriteResume(resume, keywords);
+    const improved = await rewriteResume(resume);
 
-    res.json({ output });
+    res.json({ improved });
   } catch (err) {
-    console.error("❌ REWRITE ERROR:", err);
-    res.status(500).send("Rewrite Error");
+    console.error(err);
+    res.status(500).send("Rewrite error");
   }
 });
 
 // ✅ Test route
 app.post("/test-ai", (req, res) => {
-  const dummyResponse = {
+  res.json({
     skills: ["React", "Node.js"],
     keywords: ["frontend", "API"],
     summary: "This role requires a React developer with backend knowledge.",
-  };
-
-  res.json(dummyResponse);
+  });
 });
 
 // ✅ Server start

@@ -1,3 +1,9 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// ✅ KEYWORD EXTRACTION (rule-based)
+// ✅ KEYWORD EXTRACTION
 const commonSkills = [
   "react",
   "react.js",
@@ -12,64 +18,111 @@ const commonSkills = [
   "rest",
   "api",
   "problem solving",
-  "problem-solving",
   "ai",
   "machine learning",
   "typescript",
 ];
 
-// 🔍 Keyword Extraction (Rule-based)
-async function extractKeywords(jd) {
-  try {
-    console.log("🔥 RULE-BASED EXTRACTION");
+function extractKeywords(jd) {
+  const jdText = (jd || "").toLowerCase();
 
-    const jdText = (jd || "").toLowerCase();
-
-    const keywords = commonSkills.filter((skill) =>
-      jdText.includes(skill)
-    );
-
-    console.log("✅ KEYWORDS:", keywords);
-
-    return keywords;
-  } catch (err) {
-    console.error("❌ ERROR:", err);
-    return [];
-  }
+  return commonSkills.filter((skill) =>
+    jdText.includes(skill)
+  );
 }
 
-// ✨ Resume Rewrite (keep AI here only)
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-async function rewriteResume(resume, keywords) {
+// ✅ AI SUGGESTIONS
+async function generateSuggestions({ resume, keywords, missing }) {
   try {
-    console.log("✨ REWRITE RUNNING");
-
     const model = genAI.getGenerativeModel({
-      model: "gemini-pro",
+      model: "gemini-1.5-flash-latest", // ✅ FIXED
     });
 
     const prompt = `
-Rewrite this resume professionally and include these keywords naturally:
-
-${keywords.join(", ")}
+You are an ATS resume expert.
 
 Resume:
 ${resume}
+
+Keywords:
+${keywords.join(", ")}
+
+Missing:
+${missing.join(", ")}
+
+Rules:
+- If no keywords are missing, DO NOT suggest adding keywords
+- Give only useful improvements
+- Max 5 suggestions
+
+Return ONLY JSON:
+{
+  "suggestions": ["..."]
+}
 `;
 
     const result = await model.generateContent(prompt);
+    let text = result.response.text();
 
-    return result.response.text();
+    console.log("AI RAW:", text);
+
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return [];
+
+    const parsed = JSON.parse(match[0]);
+
+    return parsed.suggestions || [];
+
   } catch (err) {
-    console.error("❌ REWRITE ERROR:", err);
-    return "Error rewriting resume";
+    console.error("AI ERROR:", err);
+
+    return [
+      "Improve project descriptions with impact",
+      "Add measurable achievements",
+      "Highlight technical skills clearly",
+    ];
   }
 }
+// ✅ EXPORT (IMPORTANT)
 
+async function rewriteResume(resume) {
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+    });
+
+    const prompt = `
+You are a professional resume writer.
+
+Rewrite this resume to improve clarity, ATS score, and impact.
+
+Resume:
+${resume}
+
+Rules:
+- Keep same structure
+- Improve wording
+- Use strong action verbs
+- Add impact where possible
+- Make it professional
+
+Return ONLY plain text.
+`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    return text;
+
+  } catch (err) {
+    console.error("REWRITE ERROR:", err);
+    return resume; // fallback
+  }
+}
 module.exports = {
   extractKeywords,
+  generateSuggestions,
   rewriteResume,
 };
