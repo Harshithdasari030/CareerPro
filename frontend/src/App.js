@@ -9,6 +9,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [animatedScore, setAnimatedScore] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
 
   // Fade in on load
   useEffect(() => {
@@ -52,6 +53,7 @@ function App() {
       setKeywords(data.keywords || []);
       setMissing(data.missing || []);
       setScore(data.score || 0);
+      setSuggestions(data.suggestions || []);
     } catch (err) {
       console.error(err);
       alert("Backend error");
@@ -117,14 +119,32 @@ function App() {
         )}
 
         <h2 className="section-heading missing">Missing Keywords</h2>
-        {missing.length === 0 ? (
-          <p>None 🎉</p>
+
+          {missing.length === 0 ? (
+            <p>None 🎉</p>
+          ) : (
+            <ul style={{ color: "red" }} className="animated-list">
+              {missing.map((k, i) => (
+                <li key={i}>{k}</li>
+              ))}
+            </ul>
+          )}
+          
+
+        {suggestions && suggestions.length > 0 ? (
+          <>
+            <h2 className="section-heading suggestions">💡 Suggestions</h2>
+            <ul className="animated-list">
+              {suggestions.map((s, i) => (
+                <li key={i}>{s}</li>
+              ))}
+            </ul>
+          </>
         ) : (
-          <ul style={{ color: "red" }} className="animated-list">
-            {missing.map((k, i) => (
-              <li key={i}>{k}</li>
-            ))}
-          </ul>
+          <>
+            <h2 className="section-heading suggestions">💡 Suggestions</h2>
+            <p>No suggestions yet</p>
+          </>
         )}
 
         <h2 className="section-heading ats-score">ATS Score</h2>

@@ -26,50 +26,78 @@ app.post("/analyze-jd", async (req, res) => {
 
     console.log("API HIT");
 
-    const keywords = await extractKeywords(jd);
+    let keywords = [];
+
+    try {
+      keywords = await extractKeywords(jd);
+    } catch (err) {
+      console.log("⚠️ AI failed, using fallback");
+
+      keywords = [
+        "react",
+        "javascript",
+        "html",
+        "css",
+        "node",
+        "rest api",
+        "git"
+      ];
+    }
+
+    // ✅ CLEAN KEYWORDS
+    const cleanKeywords = [...new Set(
+      keywords.map(k => k.toLowerCase().replace(".js", "").trim())
+    )];
 
     const normalize = (text) => (text || "").toLowerCase();
-
     const resumeText = normalize(resume);
 
-    // 🧠 Improved matching (handles "react" vs "react.js")
     const isMatch = (keyword) => {
       const k = keyword.toLowerCase().replace(/\.js/g, "").trim();
       return resumeText.includes(k);
     };
 
-    // ✅ Matched Keywords
-    const matchedKeywords = keywords.filter(isMatch);
+    // ✅ MATCHING
+    const matchedKeywords = cleanKeywords.filter(isMatch);
+    const missingKeywords = cleanKeywords.filter(k => !isMatch(k));
 
-    // ❌ Missing Keywords
-    const missingKeywords = keywords.filter(
-      (k) => !isMatch(k)
-    );
-
-    // 🎯 ATS Score (more realistic)
+    // ✅ SCORE (FIXED: use cleanKeywords, not keywords)
     let score = 0;
-
-    if (keywords.length > 0) {
+    if (cleanKeywords.length > 0) {
       score = Math.round(
-        (matchedKeywords.length / keywords.length) * 100
+        (matchedKeywords.length / cleanKeywords.length) * 100
       );
     }
 
-    // 🔥 Prevent fake 100% if too few keywords
-    if (keywords.length < 5 && score === 100) {
+    if (cleanKeywords.length < 5 && score === 100) {
       score = 80;
     }
 
+    // ✅ SUGGESTIONS (your feature 👇🔥)
+    const suggestions = missingKeywords.map(k =>
+      `Add or highlight experience related to ${k}`
+    );
+
     res.json({
-      keywords,
+      keywords: cleanKeywords,
       matched: matchedKeywords,
       missing: missingKeywords,
       score,
+      suggestions
     });
 
   } catch (err) {
-    console.error("❌ ANALYZE ERROR:", err);
-    res.status(500).send("AI Error");
+    console.error("❌ FULL BACKEND ERROR:", err);
+
+    // ✅ IMPORTANT: never crash frontend
+    res.status(200).json({
+      keywords: [],
+      matched: [],
+      missing: [],
+      score: 0,
+      suggestions: [],
+      error: true
+    });
   }
 });
 

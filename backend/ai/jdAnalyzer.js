@@ -5,14 +5,27 @@ const ai = new GoogleGenAI({
 });
 
 async function analyzeJD(jobDescription) {
-
-  // 👇 REPLACE EVERYTHING INSIDE FUNCTION WITH THIS
   const response = await ai.models.generateContent({
     model: "gemini-2.0-flash",
-    contents: "Say hello",
+    contents: `
+Extract important technical keywords from this job description.
+
+Return ONLY a JSON array like:
+["react", "node.js", "api"]
+
+Job Description:
+${jobDescription}
+`
   });
 
-  return response.text;
+  const text = response.text;
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.log("Parsing error:", text);
+    return [];
+  }
 }
 
 module.exports = analyzeJD;
