@@ -1,0 +1,117 @@
+**Name:** Arjun Sharma
+**Email:** [arjun.sharma.dev@gmail.com](mailto:arjun.sharma.dev@gmail.com)
+**Phone:** +91 9876543210
+**Location:** Bhopal, India
+
+---
+
+### 🎯 Objective
+
+Motivated Computer Science graduate seeking a Software Developer role to apply skills in full-stack development and problem-solving.
+
+---
+
+### 🛠️ Skills
+
+* Languages: Java, JavaScript, Python
+* Frontend: HTML, CSS, React.js, Bootstrap
+* Backend: Node.js, Express.js
+* Database: MySQL, MongoDB
+* Tools: Git, GitHub, VS Code
+* Concepts: OOP, Data Structures, REST APIs
+
+---
+
+### 💼 Projects
+
+**1. ATS Resume Analyzer (Major Project)**
+
+* Built a web app to analyze resumes using keyword matching
+* Tech: React.js, Node.js, MongoDB
+* Implemented resume scoring system
+
+**2. E-commerce Website**
+
+* Developed full-stack shopping platform
+* Features: Cart, Login, Payment Integration
+* Tech: MERN Stack
+
+---
+
+### 🎓 Education
+
+B.Tech in Computer Science
+Rajiv Gandhi Technical University, Bhopal
+2022 – 2026
+
+---
+
+### 🏆 Certifications
+
+* Java Programming – Coursera
+* Web Development Bootcamp – Udemy
+
+---
+
+### 📌 Strengths
+
+* Quick learner
+* Team player
+* Problem-solving mindset
+
+
+**Company:** TechNova Solutions Pvt Ltd
+
+---
+
+### 💼 Role: Junior Software Developer
+
+---
+
+### 📌 Requirements:
+
+* Strong knowledge of Java or Python
+* Experience with frontend frameworks (React preferred)
+* Understanding of REST APIs and backend development
+* Familiarity with databases (MySQL or MongoDB)
+* Knowledge of Git version control
+* Basic understanding of Data Structures and Algorithms
+
+---
+
+### ⭐ Good to Have:
+
+* Experience with cloud platforms (AWS / Azure)
+* Internship experience
+* Knowledge of Docker or CI/CD
+
+---
+
+### 🎯 Responsibilities:
+
+* Develop and maintain web applications
+* Collaborate with cross-functional teams
+* Write clean, scalable code
+* Debug and optimize performance
+
+=======================================================================================
+ALWAYS WORKING:-
+
+I am a fresher with basic knowledge of programming.
+I have worked on small projects in college.
+I am eager to learn new technologies.
+I have efficient knowledge of javascript.
+
+
+
+We are looking for a React Developer with strong experience in modern JavaScript, React.js, and frontend development. 
+
+The candidate should have knowledge of REST APIs, backend integration, and Node.js. Experience with Git, version control, and working in agile teams is preferred.
+
+Skills required:
+- React.js
+- JavaScript (ES6+)
+- HTML, CSS
+- Node.js
+- REST APIs
+- Git & GitHub
