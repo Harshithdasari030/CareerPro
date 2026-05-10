@@ -4,61 +4,100 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ✅ KEYWORD EXTRACTION (rule-based)
 // ✅ KEYWORD EXTRACTION
-const commonSkills = [
-  "react",
-  "react.js",
-  "javascript",
-  "node",
-  "node.js",
-  "mongodb",
-  "express",
-  "html",
-  "css",
-  "git",
-  "rest",
-  "api",
-  "problem solving",
-  "ai",
-  "machine learning",
-  "typescript",
-];
+
 
 function extractKeywords(jd) {
-  const jdText = (jd || "").toLowerCase();
 
-  return commonSkills.filter((skill) =>
-    jdText.includes(skill)
+  if (!jd) return [];
+
+  const text = jd.toLowerCase();
+
+  // common tech terms to detect dynamically
+  const techWords = [
+    "react",
+    "react.js",
+    "javascript",
+    "typescript",
+    "node",
+    "node.js",
+    "mongodb",
+    "express",
+    "express.js",
+    "html",
+    "css",
+    "git",
+    "rest api",
+    "api",
+    "machine learning",
+    "ai",
+    "firebase",
+    "socket.io",
+    "docker",
+    "aws",
+    "tailwind",
+    "redux",
+    "figma",
+    "next.js",
+    "mysql",
+    "python",
+    "java",
+    "c++",
+    "networking",
+  "platform testing",
+  "automation",
+  "automation testing",
+  "testing",
+  "regression testing",
+  "interoperability",
+  "ci/cd",
+  "firmware",
+  "hardware",
+  "infrastructure",
+  "ethernet",
+  "poe",
+  "switch",
+  "network interfaces",
+  "validation",
+  "selenium",
+  "pytest",
+  "linux",
+  ];
+
+  const found = techWords.filter((skill) =>
+    text.includes(skill.toLowerCase())
   );
+
+  return [...new Set(found)];
 }
 
 // ✅ AI SUGGESTIONS
 async function generateSuggestions({ resume, keywords, missing }) {
+  const shortResume = (resume || "").slice(0, 3000);
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-latest", // ✅ FIXED
+      model: "gemini-2.0-flash", // ✅ FIXED
     });
 
     const prompt = `
-You are an ATS resume expert.
+You are a professional ATS resume optimizer.
 
-Resume:
-${resume}
+Rewrite this resume specifically for the given job description.
 
-Keywords:
-${keywords.join(", ")}
+JOB DESCRIPTION:
+${jd}
 
-Missing:
-${missing.join(", ")}
+RESUME:
+${shortResume}
 
 Rules:
-- If no keywords are missing, DO NOT suggest adding keywords
-- Give only useful improvements
-- Max 5 suggestions
-
-Return ONLY JSON:
-{
-  "suggestions": ["..."]
-}
+- Improve ATS alignment
+- Highlight relevant technical skills
+- Emphasize Python, backend, automation, APIs
+- Improve project descriptions
+- Use stronger action verbs
+- Make achievements more impactful
+- Keep professional formatting
+- Return ONLY plain text
 `;
 
     const result = await model.generateContent(prompt);
@@ -76,7 +115,7 @@ Return ONLY JSON:
     return parsed.suggestions || [];
 
   } catch (err) {
-    console.error("AI ERROR:", err);
+   console.log("⚠️ Gemini unavailable. Using fallback suggestions.");
 
     return [
       "Improve project descriptions with impact",
@@ -87,38 +126,134 @@ Return ONLY JSON:
 }
 // ✅ EXPORT (IMPORTANT)
 
-async function rewriteResume(resume) {
+async function rewriteResume(resume, jd) {
+
   try {
+
+    const shortResume = resume.slice(0, 3000);
+
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
     });
 
     const prompt = `
-You are a professional resume writer.
+You are a professional ATS resume writer.
 
-Rewrite this resume to improve clarity, ATS score, and impact.
+Rewrite this resume specifically for the given job description.
 
-Resume:
-${resume}
+JOB DESCRIPTION:
+${jd}
+
+RESUME:
+${shortResume}
 
 Rules:
-- Keep same structure
-- Improve wording
-- Use strong action verbs
-- Add impact where possible
-- Make it professional
-
-Return ONLY plain text.
+- Improve ATS alignment
+- Highlight relevant technical skills
+- Use stronger action verbs
+- Improve project descriptions
+- Keep professional formatting
+- Return ONLY plain text
 `;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const result =
+      await model.generateContent(prompt);
 
-    return text;
+    return result.response.text();
 
   } catch (err) {
-    console.error("REWRITE ERROR:", err);
-    return resume; // fallback
+
+   console.log(
+  "⚠️ Gemini unavailable. Using smart fallback."
+);
+
+const lowerJD = jd.toLowerCase();
+
+let improved =
+  "Suggested Resume Improvements:\n\n";
+
+// ==================================
+// FRONTEND ROLE
+// ==================================
+
+if (
+  lowerJD.includes("react") ||
+  lowerJD.includes("frontend")
+) {
+
+  improved +=
+`• Use stronger frontend impact statements
+• Highlight scalable React application development
+• Mention responsive UI optimization and performance improvements
+
+`;
+}
+
+// ==================================
+// TESTING / AUTOMATION ROLE
+// ==================================
+
+if (
+  lowerJD.includes("testing") ||
+  lowerJD.includes("automation") ||
+  lowerJD.includes("ci/cd")
+) {
+
+  improved +=
+`• Mention backend testing and debugging experience
+• Highlight automation workflows and API validation
+• Add exposure to CI/CD pipelines if applicable
+
+`;
+}
+
+// ==================================
+// NETWORKING ROLE
+// ==================================
+
+if (
+  lowerJD.includes("network") ||
+  lowerJD.includes("infrastructure") ||
+  lowerJD.includes("hardware")
+) {
+
+  improved +=
+`• Emphasize networking and infrastructure interests
+• Highlight scalable backend and distributed systems
+• Mention system integration and problem-solving abilities
+
+`;
+}
+
+// ==================================
+// PYTHON / AI ROLE
+// ==================================
+
+if (
+  lowerJD.includes("python") ||
+  lowerJD.includes("ai") ||
+  lowerJD.includes("machine learning")
+) {
+
+  improved +=
+`• Highlight Python and AI project experience
+• Mention TensorFlow and Computer Vision projects
+• Add measurable AI project outcomes where possible
+
+`;
+}
+
+// ==================================
+// GENERAL IMPROVEMENTS
+// ==================================
+
+improved +=
+`• Use stronger action verbs consistently
+• Add measurable achievements in projects
+• Quantify internship and project impact
+`;
+
+return improved;
   }
 }
 module.exports = {
