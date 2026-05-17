@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="light-mode">
+  <div class="app">
+    <!-- Sidebar -->
+    <nav class="sidebar" aria-label="Primary Navigation">
+      <div class="logo">CareerPro</div>
+      <ul class="nav-list">
+        <li class="nav-item active" tabindex="0"><span class="icon">🏠</span><span class="label">Home</span></li>
+        <li class="nav-item" tabindex="0"><span class="icon">👥</span><span class="label">Users</span></li>
+        <li class="nav-item" tabindex="0"><span class="icon">📊</span><span class="label">Data</span></li>
+        <li class="nav-item" tabindex="0"><span class="icon">🧩</span><span class="label">Apps</span></li>
+        <li class="nav-item" tabindex="0"><span class="icon">🔌</span><span class="label">Integrations</span></li>
+      </ul>
+      <button class="theme-toggle" aria-label="Toggle dark mode" id="themeToggle">🌙</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <input type="text" class="search" placeholder="Search..." aria-label="Search" />
+        <div class="top-actions">
+          <button class="icon-btn" aria-label="Notifications">🔔</button>
+          <button class="icon-btn" aria-label="User profile">👤</button>
+        </div>
+      </header>
+
+      <!-- Card Grid -->
+      <section class="card-grid">
+        <article class="card">
+          <h2>Analytics Overview</h2>
+          <p>Quick insight into recent hiring trends and candidate pipelines.</p>
+          <button class="action-btn">View Details</button>
+        </article>
+        <article class="card">
+          <h2>User Management</h2>
+          <p>Manage user roles, permissions, and onboarding flows.</p>
+          <button class="action-btn">Manage Users</button>
+        </article>
+        <article class="card">
+          <h2>Data Sync</h2>
+          <p>Configure data connectors and schedule imports.</p>
+          <button class="action-btn">Configure</button>
+        </article>
+        <article class="card">
+          <h2>App Marketplace</h2>
+          <p>Explore and install integrations to extend functionality.</p>
+          <button class="action-btn">Browse Apps</button>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="theme.js"></script>
+</body>
+</html>
